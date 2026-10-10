@@ -4,4 +4,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   base: '/license-plate-project/',
+  build: {
+    target: 'es2015'
+  }
 })

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useSearchParams } from 'react-router-dom';
+import { HashRouter, Routes, Route, useSearchParams } from 'react-router-dom';
 import { ThemeProvider } from './ThemeContext';
 import Navbar from './components/Navbar';
 import HistoryPage from './pages/HistoryPage';
@@ -106,7 +106,7 @@ function LookupPageWithQuery() {
 function App() {
   return (
     <ThemeProvider>
-      <BrowserRouter basename="/license-plate-project/">
+      <HashRouter>
         <div className="app" id="app">
           <Navbar />
           <Routes>
@@ -114,7 +114,7 @@ function App() {
             <Route path="/history" element={<HistoryPage />} />
           </Routes>
         </div>
-      </BrowserRouter>
+      </HashRouter>
     </ThemeProvider>
   );
 }
