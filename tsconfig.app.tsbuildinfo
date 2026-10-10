@@ -1,0 +1,1 @@
+{"root":["./src/App.tsx","./src/ThemeContext.tsx","./src/api.ts","./src/display.ts","./src/history.ts","./src/main.tsx","./src/types.ts","./src/validation.ts","./src/vite-env.d.ts","./src/components/ErrorDisplay.tsx","./src/components/Navbar.tsx","./src/components/PlateInput.tsx","./src/components/VehicleResults.tsx","./src/pages/HistoryPage.tsx"],"version":"6.0.3"}
