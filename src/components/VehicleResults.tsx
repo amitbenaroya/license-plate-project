@@ -1,6 +1,5 @@
 import type { VehicleInfo } from '../types';
 import { displayValue, getVehicleTypeLabel, formatDate } from '../display';
-import { formatPlateDisplay } from '../validation';
 
 interface VehicleResultsProps {
   vehicle: VehicleInfo;
@@ -24,13 +23,6 @@ function InfoRow({ label, value, id }: InfoRowProps) {
 export default function VehicleResults({ vehicle }: VehicleResultsProps) {
   return (
     <div className="vehicle-results" id="vehicle-results">
-      <div className="results-plate-badge" id="results-plate-badge">
-        <div className="badge-il-strip" aria-hidden="true">IL</div>
-        <span className="badge-plate-number">
-          {formatPlateDisplay(vehicle.licensePlate)}
-        </span>
-      </div>
-
       <div className="results-grid">
         <div className="results-section">
           <h2 className="section-title">Vehicle Details</h2>
