@@ -14,11 +14,13 @@ import type { VehicleInfo, AppError } from './types';
  * Wrapper for LookupPage that handles ?plate= query param from history navigation
  */
 function LookupPageWithQuery() {
+// ... keeping existing state and functions but replacing the render
   const [searchParams, setSearchParams] = useSearchParams();
   const [vehicle, setVehicle] = useState<VehicleInfo | null>(null);
   const [error, setError] = useState<AppError | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [lastSearchedPlate, setLastSearchedPlate] = useState<string>('');
+  const [historyId, setHistoryId] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const initialPlateHandled = useRef(false);
 
@@ -36,6 +38,7 @@ function LookupPageWithQuery() {
     setError(null);
     setVehicle(null);
     setLastSearchedPlate(plate);
+    setHistoryId(null);
 
     // Clear query param after using it
     if (searchParams.has('plate')) {
@@ -45,7 +48,8 @@ function LookupPageWithQuery() {
     try {
       const result = await lookupVehicle(plate, controller.signal);
       setVehicle(result);
-      addToHistory(plate, result, true);
+      const newHistoryId = addToHistory(plate, result, true);
+      setHistoryId(newHistoryId);
     } catch (err) {
       const appError = err as AppError;
       setError(appError);
@@ -96,7 +100,7 @@ function LookupPageWithQuery() {
         )}
 
         {vehicle && !isLoading && !error && (
-          <VehicleResults vehicle={vehicle} />
+          <VehicleResults vehicle={vehicle} historyId={historyId} />
         )}
       </div>
     </main>

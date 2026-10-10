@@ -47,9 +47,8 @@ export default function PlateInput({ onSearch, isLoading }: PlateInputProps) {
     <form className="plate-input-form" onSubmit={handleSubmit} id="plate-search-form">
       <div className="plate-input-wrapper">
         <div className={`plate-input-container ${error ? 'plate-input-error' : ''}`}>
-          <div className="plate-il-strip" aria-hidden="true">
+          <div className="plate-il-strip" aria-hidden="true" style={{ background: 'transparent' }}>
             <span className="plate-il-flag">🇮🇱</span>
-            <span className="plate-il-text">IL</span>
           </div>
           <input
             ref={inputRef}

@@ -60,6 +60,11 @@ export interface SearchHistoryEntry {
   searchedAt: string; // ISO date string
   vehicleInfo: VehicleInfo | null;
   found: boolean;
+  location?: {
+    lat: number;
+    lng: number;
+    accuracy: number;
+  };
 }
 
 /** API response wrapper from CKAN datastore_search */

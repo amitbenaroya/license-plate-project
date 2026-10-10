@@ -6,6 +6,7 @@ import VehicleImage from './VehicleImage';
 
 interface VehicleResultsProps {
   vehicle: VehicleInfo;
+  historyId?: string | null;
 }
 
 interface SpecCardProps {
@@ -72,10 +73,10 @@ function ExpandableSection({ title, defaultExpanded = false, children }: Section
   );
 }
 
-export default function VehicleResults({ vehicle }: VehicleResultsProps) {
+export default function VehicleResults({ vehicle, historyId }: VehicleResultsProps) {
   return (
     <div className="vehicle-results" id="vehicle-results">
-      <VehicleImage vehicle={vehicle} />
+      <VehicleImage vehicle={vehicle} historyId={historyId} />
       <div className="sections-container">
         <ExpandableSection title="Overview" defaultExpanded={true}>
           <SpecCard label="Manufacturer" value={displayValue(vehicle.manufacturer)} />

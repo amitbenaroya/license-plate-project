@@ -21,14 +21,15 @@ export function getHistory(): SearchHistoryEntry[] {
 /**
  * Adds a successful search result to history.
  * Prevents duplicates for the same plate by replacing the existing entry.
+ * Returns the ID of the newly created entry.
  */
 export function addToHistory(
   licensePlate: string,
   vehicleInfo: VehicleInfo | null,
   found: boolean
-): void {
+): string | null {
   // Only store entries for found vehicles
-  if (!found) return;
+  if (!found) return null;
 
   const history = getHistory();
   // Remove existing entry for the same plate
@@ -36,8 +37,9 @@ export function addToHistory(
     (entry) => entry.licensePlate !== licensePlate
   );
 
+  const newId = `${licensePlate}-${Date.now()}`;
   const newEntry: SearchHistoryEntry = {
-    id: `${licensePlate}-${Date.now()}`,
+    id: newId,
     licensePlate,
     searchedAt: new Date().toISOString(),
     vehicleInfo,
@@ -52,8 +54,43 @@ export function addToHistory(
 
   try {
     localStorage.setItem(HISTORY_KEY, JSON.stringify(trimmed));
+    return newId;
   } catch {
     // localStorage might be full; silently fail
+    return null;
+  }
+}
+
+/**
+ * Updates an existing history entry with location data.
+ */
+export function updateHistoryLocation(
+  id: string,
+  location: { lat: number; lng: number; accuracy: number }
+): void {
+  const history = getHistory();
+  const index = history.findIndex((entry) => entry.id === id);
+  if (index === -1) return;
+
+  history[index].location = location;
+
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  } catch {
+    // silently fail
+  }
+}
+
+/**
+ * Deletes a single history record.
+ */
+export function deleteHistoryRecord(id: string): void {
+  const history = getHistory();
+  const filtered = history.filter((entry) => entry.id !== id);
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(filtered));
+  } catch {
+    // silently fail
   }
 }
 

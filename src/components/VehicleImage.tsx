@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import type { VehicleInfo } from '../types';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, MapPin } from 'lucide-react';
+import { updateHistoryLocation } from '../history';
 
 interface VehicleImageProps {
   vehicle: VehicleInfo;
+  historyId?: string | null;
 }
 
 // Map common Hebrew manufacturer names to English for Wikipedia search
@@ -50,11 +52,36 @@ const MANUFACTURER_MAP: Record<string, string> = {
 
 
 
-export default function VehicleImage({ vehicle }: VehicleImageProps) {
+export default function VehicleImage({ vehicle, historyId }: VehicleImageProps) {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [description, setDescription] = useState<string | null>(null);
   const [wikiUrl, setWikiUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLocating, setIsLocating] = useState(false);
+  const [locationSaved, setLocationSaved] = useState(false);
+
+  const handleSaveLocation = () => {
+    if (!historyId || !('geolocation' in navigator)) return;
+    
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        updateHistoryLocation(historyId, {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          accuracy: position.coords.accuracy
+        });
+        setIsLocating(false);
+        setLocationSaved(true);
+      },
+      (error) => {
+        console.warn('Geolocation failed or denied:', error);
+        setIsLocating(false);
+        alert('Failed to get location. Please ensure location permissions are granted.');
+      },
+      { timeout: 10000, maximumAge: 0, enableHighAccuracy: true }
+    );
+  };
 
   // Compute English manufacturer and model outside useEffect for the title
   const manufacturerHebrew = vehicle.manufacturer?.trim() || '';
@@ -180,12 +207,29 @@ export default function VehicleImage({ vehicle }: VehicleImageProps) {
         <div className="vehicle-description-card detail-section">
           {carTitle && <h2 className="vehicle-title">{carTitle}</h2>}
           {description && <p className="vehicle-description-text">{description}</p>}
-          {(imageUrl && description && wikiUrl) && (
-            <a href={wikiUrl} target="_blank" rel="noopener noreferrer" className="wiki-link-button">
-              Wikipedia
-              <ExternalLink size={16} />
-            </a>
-          )}
+          <div className="vehicle-actions-row">
+            {(imageUrl && description && wikiUrl) && (
+              <a href={wikiUrl} target="_blank" rel="noopener noreferrer" className="wiki-link-button">
+                Wikipedia
+                <ExternalLink size={16} />
+              </a>
+            )}
+            {historyId && !locationSaved && (
+              <button 
+                onClick={handleSaveLocation} 
+                disabled={isLocating}
+                className="save-location-button wiki-link-button"
+              >
+                {isLocating ? 'Saving...' : 'Save Location'}
+                <MapPin size={16} className={isLocating ? 'animate-pulse' : ''} />
+              </button>
+            )}
+            {locationSaved && (
+              <span className="location-saved-text" style={{ fontSize: 'var(--text-xs)', color: 'var(--success)' }}>
+                Location Saved!
+              </span>
+            )}
+          </div>
         </div>
       )}
     </>
