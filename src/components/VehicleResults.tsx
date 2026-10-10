@@ -1,21 +1,72 @@
+import { useState } from 'react';
 import type { VehicleInfo } from '../types';
 import { displayValue, getVehicleTypeLabel, formatDate } from '../display';
+import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 
 interface VehicleResultsProps {
   vehicle: VehicleInfo;
 }
 
-interface InfoRowProps {
+interface SpecCardProps {
   label: string;
-  value: string;
-  id: string;
+  value: string | null;
+  hint?: string;
 }
 
-function InfoRow({ label, value, id }: InfoRowProps) {
+function SpecCard({ label, value, hint }: SpecCardProps) {
+  const [showHint, setShowHint] = useState(false);
+  const displayVal = value ? value : 'Not available';
+  const isMissing = !value;
+
   return (
-    <div className="info-row" id={id}>
-      <span className="info-label">{label}</span>
-      <span className="info-value">{value}</span>
+    <div className={`spec-card ${isMissing ? 'spec-missing' : ''}`}>
+      <div className="spec-label-row">
+        <span className="spec-label">{label}</span>
+        {hint && (
+          <button 
+            className="spec-hint-btn" 
+            onClick={() => setShowHint(!showHint)}
+            title="More info"
+            aria-label="More information"
+          >
+            <Info size={14} />
+          </button>
+        )}
+      </div>
+      <span className="spec-value">{displayVal}</span>
+      {showHint && <div className="spec-hint-text">{hint}</div>}
+    </div>
+  );
+}
+
+interface SectionProps {
+  title: string;
+  defaultExpanded?: boolean;
+  children: React.ReactNode;
+}
+
+function ExpandableSection({ title, defaultExpanded = false, children }: SectionProps) {
+  const [expanded, setExpanded] = useState(defaultExpanded);
+
+  return (
+    <div className={`detail-section ${expanded ? 'expanded' : ''}`}>
+      <button 
+        className="section-header" 
+        onClick={() => setExpanded(!expanded)}
+        aria-expanded={expanded}
+      >
+        <h3 className="section-title">{title}</h3>
+        <div className="section-toggle">
+          {expanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+        </div>
+      </button>
+      {expanded && (
+        <div className="section-content">
+          <div className="spec-grid">
+            {children}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -23,42 +74,36 @@ function InfoRow({ label, value, id }: InfoRowProps) {
 export default function VehicleResults({ vehicle }: VehicleResultsProps) {
   return (
     <div className="vehicle-results" id="vehicle-results">
-      <div className="results-grid">
-        <div className="results-section">
-          <h2 className="section-title">Vehicle Details</h2>
-          <div className="info-group">
-            <InfoRow label="Manufacturer" value={displayValue(vehicle.manufacturer)} id="info-manufacturer" />
-            <InfoRow label="Model" value={displayValue(vehicle.model)} id="info-model" />
-            <InfoRow label="Commercial Name" value={displayValue(vehicle.commercialName)} id="info-commercial" />
-            <InfoRow label="Year" value={displayValue(vehicle.year)} id="info-year" />
-            <InfoRow label="Color" value={displayValue(vehicle.color)} id="info-color" />
-            <InfoRow label="Fuel Type" value={displayValue(vehicle.fuelType)} id="info-fuel" />
-            <InfoRow label="Vehicle Type" value={getVehicleTypeLabel(vehicle.vehicleType)} id="info-type" />
-            <InfoRow label="Ownership" value={displayValue(vehicle.ownership)} id="info-ownership" />
-          </div>
-        </div>
+      <div className="sections-container">
+        <ExpandableSection title="Overview" defaultExpanded={true}>
+          <SpecCard label="Manufacturer" value={displayValue(vehicle.manufacturer)} />
+          <SpecCard label="Model" value={displayValue(vehicle.model)} />
+          <SpecCard label="Commercial Name" value={displayValue(vehicle.commercialName)} />
+          <SpecCard label="Model Year" value={displayValue(vehicle.year)} />
+          <SpecCard label="Trim / Designation" value={displayValue(vehicle.trimLevel)} />
+        </ExpandableSection>
 
-        <div className="results-section">
-          <h2 className="section-title">Technical Information</h2>
-          <div className="info-group">
-            <InfoRow label="Engine Model" value={displayValue(vehicle.engineModel)} id="info-engine" />
-            <InfoRow label="Trim Level" value={displayValue(vehicle.trimLevel)} id="info-trim" />
-            <InfoRow label="Safety Level" value={displayValue(vehicle.safetyLevel)} id="info-safety" />
-            <InfoRow label="Pollution Group" value={displayValue(vehicle.pollutionGroup)} id="info-pollution" />
-            <InfoRow label="Front Tires" value={displayValue(vehicle.frontTires)} id="info-front-tires" />
-            <InfoRow label="Rear Tires" value={displayValue(vehicle.rearTires)} id="info-rear-tires" />
-            <InfoRow label="Chassis" value={displayValue(vehicle.chassisNumber)} id="info-chassis" />
-          </div>
-        </div>
+        <ExpandableSection title="Registration Details">
+          <SpecCard label="Vehicle Type" value={getVehicleTypeLabel(vehicle.vehicleType)} />
+          <SpecCard label="Ownership" value={displayValue(vehicle.ownership)} hint="Private, Commercial, Leasing, etc." />
+          <SpecCard label="On Road Since" value={formatDate(vehicle.onRoadSince)} />
+          <SpecCard label="License Valid Until" value={formatDate(vehicle.licenseValidUntil)} />
+          <SpecCard label="Chassis Number" value={displayValue(vehicle.chassisNumber)} />
+        </ExpandableSection>
 
-        <div className="results-section">
-          <h2 className="section-title">Registration & Testing</h2>
-          <div className="info-group">
-            <InfoRow label="Last Road Test" value={formatDate(vehicle.lastTestDate)} id="info-last-test" />
-            <InfoRow label="License Valid Until" value={formatDate(vehicle.licenseValidUntil)} id="info-license-valid" />
-            <InfoRow label="On Road Since" value={displayValue(vehicle.onRoadSince)} id="info-on-road" />
-          </div>
-        </div>
+        <ExpandableSection title="Technical & Physical">
+          <SpecCard label="Engine Model" value={displayValue(vehicle.engineModel)} />
+          <SpecCard label="Fuel Type" value={displayValue(vehicle.fuelType)} />
+          <SpecCard label="Color" value={displayValue(vehicle.color)} />
+          <SpecCard label="Front Tires" value={displayValue(vehicle.frontTires)} />
+          <SpecCard label="Rear Tires" value={displayValue(vehicle.rearTires)} />
+        </ExpandableSection>
+
+        <ExpandableSection title="Environment & Safety">
+          <SpecCard label="Last Inspection" value={formatDate(vehicle.lastTestDate)} />
+          <SpecCard label="Safety Level" value={displayValue(vehicle.safetyLevel)} hint="Safety equipment score (0-8)" />
+          <SpecCard label="Pollution Group" value={displayValue(vehicle.pollutionGroup)} hint="Green rating (1-15, 1 is best)" />
+        </ExpandableSection>
       </div>
     </div>
   );
