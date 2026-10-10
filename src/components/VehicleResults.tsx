@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { VehicleInfo } from '../types';
 import { displayValue, getVehicleTypeLabel, formatDate } from '../display';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
+import VehicleImage from './VehicleImage';
 
 interface VehicleResultsProps {
   vehicle: VehicleInfo;
@@ -74,6 +75,7 @@ function ExpandableSection({ title, defaultExpanded = false, children }: Section
 export default function VehicleResults({ vehicle }: VehicleResultsProps) {
   return (
     <div className="vehicle-results" id="vehicle-results">
+      <VehicleImage vehicle={vehicle} />
       <div className="sections-container">
         <ExpandableSection title="Overview" defaultExpanded={true}>
           <SpecCard label="Manufacturer" value={displayValue(vehicle.manufacturer)} />

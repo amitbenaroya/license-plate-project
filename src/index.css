@@ -9,7 +9,9 @@
   --bg-primary: #ffffff;
   --bg-secondary: #f8f9fb;
   --bg-tertiary: #f1f3f6;
+  --bg-tertiary-glass: rgba(241, 243, 246, 0.7);
   --bg-elevated: #ffffff;
+  --bg-elevated-glass: rgba(255, 255, 255, 0.75);
 
   --text-primary: #0f172a;
   --text-secondary: #475569;
@@ -88,7 +90,9 @@
   --bg-primary: #0f172a;
   --bg-secondary: #1e293b;
   --bg-tertiary: #293548;
+  --bg-tertiary-glass: rgba(41, 53, 72, 0.7);
   --bg-elevated: #1e293b;
+  --bg-elevated-glass: rgba(30, 41, 59, 0.75);
 
   --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
@@ -538,10 +542,15 @@ input {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  position: relative;
+  z-index: 10;
+  padding-top: var(--space-md);
 }
 
 .detail-section {
-  background: var(--bg-elevated);
+  background: var(--bg-elevated-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -598,7 +607,9 @@ input {
 }
 
 .spec-card {
-  background: var(--bg-tertiary);
+  background: var(--bg-tertiary-glass);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   padding: var(--space-md);
   border-radius: var(--radius-md);
   display: flex;
@@ -663,6 +674,65 @@ input {
   padding-top: 4px;
   border-top: 1px solid var(--border-default);
   animation: fadeIn 0.2s ease;
+}
+
+/* --- Vehicle Image --- */
+.vehicle-image-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto var(--space-xl);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-tertiary);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 16/9;
+  
+  /* Sticky Scrolling Effect */
+  position: sticky;
+  top: calc(var(--navbar-height) + var(--space-md));
+  z-index: 1;
+}
+
+.vehicle-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: fadeSlideIn 0.5s ease;
+}
+
+.loading-image .image-skeleton {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--border-subtle) 50%, var(--bg-tertiary) 75%);
+  background-size: 200% 100%;
+  animation: skeletonLoading 1.5s infinite;
+}
+
+@keyframes skeletonLoading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.fallback-image {
+  background: var(--bg-elevated);
+  border: 1px dashed var(--border-default);
+  flex-direction: column;
+  gap: var(--space-md);
+  color: var(--text-tertiary);
+}
+
+.fallback-icon {
+  color: var(--border-focus);
+  opacity: 0.5;
+}
+
+.fallback-text {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 /* --- Error Display --- */
