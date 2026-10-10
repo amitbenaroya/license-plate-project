@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { VehicleInfo } from '../types';
+import { ExternalLink } from 'lucide-react';
 
 interface VehicleImageProps {
   vehicle: VehicleInfo;
@@ -52,6 +53,7 @@ const MANUFACTURER_MAP: Record<string, string> = {
 export default function VehicleImage({ vehicle }: VehicleImageProps) {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [description, setDescription] = useState<string | null>(null);
+  const [wikiUrl, setWikiUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Compute English manufacturer and model outside useEffect for the title
@@ -112,6 +114,7 @@ export default function VehicleImage({ vehicle }: VehicleImageProps) {
 
             const wikiTitle = entity.sitelinks?.enwiki?.title;
             if (wikiTitle && isMounted) {
+              setWikiUrl(`https://en.wikipedia.org/wiki/${encodeURIComponent(wikiTitle.replace(/ /g, '_'))}`);
               try {
                 const summaryRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiTitle)}`);
                 const summaryData = await summaryRes.json();
@@ -148,6 +151,13 @@ export default function VehicleImage({ vehicle }: VehicleImageProps) {
     );
   }
 
+  console.log('VehicleImage render state:', { 
+    hasImageUrl: !!imageUrl, 
+    hasDescription: !!description, 
+    hasWikiUrl: !!wikiUrl,
+    wikiUrl
+  });
+
   if (!imageUrl && !description && !carTitle) {
     return null;
   }
@@ -170,6 +180,12 @@ export default function VehicleImage({ vehicle }: VehicleImageProps) {
         <div className="vehicle-description-card detail-section">
           {carTitle && <h2 className="vehicle-title">{carTitle}</h2>}
           {description && <p className="vehicle-description-text">{description}</p>}
+          {(imageUrl && description && wikiUrl) && (
+            <a href={wikiUrl} target="_blank" rel="noopener noreferrer" className="wiki-link-button">
+              Wikipedia
+              <ExternalLink size={16} />
+            </a>
+          )}
         </div>
       )}
     </>

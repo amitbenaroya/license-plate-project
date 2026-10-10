@@ -713,6 +713,30 @@ input {
   margin: 0;
 }
 
+.wiki-link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin: var(--space-sm) auto 0;
+  padding: 6px var(--space-lg);
+  background: rgba(128, 128, 128, 0.1);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  text-decoration: none;
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.wiki-link-button:hover {
+  background: rgba(128, 128, 128, 0.18);
+  transform: translateY(-1px);
+}
+
 .vehicle-image {
   width: 100%;
   height: 100%;
