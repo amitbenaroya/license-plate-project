@@ -270,7 +270,7 @@ export default function HistoryPage() {
       <div className="history-pill-filters">
         <div className="pill-select-wrapper">
           <select className="pill-input" value={filterMake} onChange={e => { setFilterMake(e.target.value); setFilterModel(''); }}>
-            <option value="">All Makes</option>
+            <option value="">Makes</option>
             {availableMakes.map(m => <option key={m} value={m}>{m}</option>)}
           </select>
           <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -278,7 +278,7 @@ export default function HistoryPage() {
 
         <div className="pill-select-wrapper">
           <select className="pill-input" value={filterModel} onChange={e => setFilterModel(e.target.value)} disabled={availableModels.length === 0}>
-            <option value="">All Models</option>
+            <option value="">Models</option>
             {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
           </select>
           <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -286,7 +286,7 @@ export default function HistoryPage() {
 
         <div className="pill-select-wrapper">
           <select className="pill-input" value={filterYear} onChange={e => setFilterYear(e.target.value)}>
-            <option value="">All Years</option>
+            <option value="">Years</option>
             {availableYears.map(y => <option key={y} value={y.toString()}>{y}</option>)}
           </select>
           <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -294,7 +294,7 @@ export default function HistoryPage() {
 
         <div className="pill-select-wrapper">
           <select className="pill-input" value={filterColor} onChange={e => setFilterColor(e.target.value)}>
-            <option value="">All Colors</option>
+            <option value="">Colors</option>
             {availableColors.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
           <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -302,7 +302,7 @@ export default function HistoryPage() {
 
         <div className="pill-select-wrapper">
           <select className="pill-input" value={filterDate} onChange={e => setFilterDate(e.target.value)}>
-            <option value="">All Dates</option>
+            <option value="">Dates</option>
             {availableDates.map(d => (
               <option key={d.value} value={d.value}>{d.label}</option>
             ))}
