@@ -184,19 +184,11 @@ input {
   top: 0;
   z-index: 100;
   height: var(--navbar-height);
-  background: var(--bg-elevated);
+  background: var(--bg-elevated-glass);
   border-bottom: 1px solid var(--border-default);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   transition: background-color var(--transition-normal), border-color var(--transition-normal);
-}
-
-[data-theme="light"] .navbar,
-:root:not([data-theme="dark"]) .navbar {
-  background: rgba(255, 255, 255, 0.92);
-}
-
-[data-theme="dark"] .navbar {
-  background: rgba(15, 23, 42, 0.92);
 }
 
 .navbar-inner {
@@ -694,6 +686,31 @@ input {
   position: sticky;
   top: calc(var(--navbar-height) + var(--space-md));
   z-index: 1;
+}
+
+.vehicle-description-card {
+  padding: var(--space-md) var(--space-lg);
+  margin: 0 auto var(--space-md);
+  max-width: 600px;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.vehicle-title {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-sm) 0;
+  letter-spacing: -0.02em;
+}
+
+.vehicle-description-text {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  font-style: italic;
+  line-height: 1.5;
+  margin: 0;
 }
 
 .vehicle-image {

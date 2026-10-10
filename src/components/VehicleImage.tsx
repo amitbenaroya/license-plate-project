@@ -51,42 +51,39 @@ const MANUFACTURER_MAP: Record<string, string> = {
 
 export default function VehicleImage({ vehicle }: VehicleImageProps) {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [description, setDescription] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Compute English manufacturer and model outside useEffect for the title
+  const manufacturerHebrew = vehicle.manufacturer?.trim() || '';
+  let manufacturerEng = '';
+  for (const [heb, eng] of Object.entries(MANUFACTURER_MAP)) {
+    if (manufacturerHebrew.includes(heb)) {
+      manufacturerEng = eng;
+      break;
+    }
+  }
+  const modelName = vehicle.commercialName?.trim() || vehicle.model?.trim() || '';
+  
+  // Create a clean English/Hebrew title depending on what's available
+  const displayManufacturer = manufacturerEng || manufacturerHebrew;
+  // Dedup manufacturer from model name if needed (e.g. Mazda Mazda 3)
+  const cleanModelName = modelName.toLowerCase().includes(displayManufacturer.toLowerCase()) 
+    ? modelName 
+    : `${displayManufacturer} ${modelName}`;
+  const carTitle = `${cleanModelName} ${vehicle.year || ''}`.trim();
 
   useEffect(() => {
     let isMounted = true;
 
-    async function fetchImage() {
+    async function fetchImageAndDesc() {
       setIsLoading(true);
       
-      const manufacturerHebrew = vehicle.manufacturer?.trim() || '';
-      
-      let manufacturerEng = '';
-      for (const [heb, eng] of Object.entries(MANUFACTURER_MAP)) {
-        if (manufacturerHebrew.includes(heb)) {
-          manufacturerEng = eng;
-          break;
-        }
-      }
-
-      const modelName = vehicle.commercialName?.trim() || vehicle.model?.trim() || '';
-
-      console.log('Vehicle details for image search:', {
-        manufacturerHebrew,
-        manufacturerEng,
-        modelName,
-        commercialName: vehicle.commercialName,
-        model: vehicle.model
-      });
-
-      // If we don't have enough English/Mapped info to search, give up gracefully
       if (!manufacturerEng || !modelName) {
-        console.warn('Missing English manufacturer or model name, falling back.');
         if (isMounted) setIsLoading(false);
         return;
       }
 
-      // Prevent duplicate manufacturer names (e.g., "Mazda MAZDA 3" -> "MAZDA 3")
       let searchQuery = `${manufacturerEng} ${modelName}`;
       if (modelName.toLowerCase().includes(manufacturerEng.toLowerCase())) {
         searchQuery = modelName;
@@ -94,48 +91,54 @@ export default function VehicleImage({ vehicle }: VehicleImageProps) {
       searchQuery = searchQuery.replace(/\s+/g, ' ').trim();
 
       try {
-        // Step 1: Search Wikidata for the exact car model entity
         const searchApiUrl = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(searchQuery)}&language=en&format=json&origin=*`;
         const searchRes = await fetch(searchApiUrl);
         const searchData = await searchRes.json();
 
         if (searchData?.search?.length > 0) {
-          // Find the most relevant entity (usually the first one)
           const entityId = searchData.search[0].id;
           
-          // Step 2: Fetch the 'image' property (P18) for this entity
-          const claimsApiUrl = `https://www.wikidata.org/w/api.php?action=wbgetclaims&entity=${entityId}&property=P18&format=json&origin=*`;
-          const claimsRes = await fetch(claimsApiUrl);
-          const claimsData = await claimsRes.json();
+          const detailsApiUrl = `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${entityId}&props=claims|sitelinks&sitefilter=enwiki&format=json&origin=*`;
+          const detailsRes = await fetch(detailsApiUrl);
+          const detailsData = await detailsRes.json();
+          const entity = detailsData?.entities?.[entityId];
 
-          const imageClaim = claimsData?.claims?.P18?.[0]?.mainsnak?.datavalue?.value;
-          
-          if (imageClaim && isMounted) {
-            // Step 3: Construct the Commons URL using Special:FilePath with a fixed width
-            const fileName = encodeURIComponent(imageClaim.replace(/ /g, '_'));
-            const imgUrl = `https://commons.wikimedia.org/wiki/Special:FilePath/${fileName}?width=800`;
-            console.log('Found Wikidata image URL:', imgUrl);
-            setImageUrl(imgUrl);
-            return;
-          } else {
-            console.log('No P18 image claim found for entity:', entityId);
+          if (entity) {
+            const imageClaim = entity.claims?.P18?.[0]?.mainsnak?.datavalue?.value;
+            if (imageClaim && isMounted) {
+              const fileName = encodeURIComponent(imageClaim.replace(/ /g, '_'));
+              setImageUrl(`https://commons.wikimedia.org/wiki/Special:FilePath/${fileName}?width=800`);
+            }
+
+            const wikiTitle = entity.sitelinks?.enwiki?.title;
+            if (wikiTitle && isMounted) {
+              try {
+                const summaryRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiTitle)}`);
+                const summaryData = await summaryRes.json();
+                if (summaryData?.extract && isMounted) {
+                  const text = summaryData.extract;
+                  const shortText = text.length > 250 ? text.substring(0, 247) + '...' : text;
+                  setDescription(shortText);
+                }
+              } catch (e) {
+                console.error('Failed to fetch Wikipedia summary', e);
+              }
+            }
           }
-        } else {
-          console.log('No Wikidata entities found for search:', searchQuery);
         }
       } catch (err) {
-        console.error('Failed to fetch Wikidata image:', err);
+        console.error('Failed to fetch Wikidata:', err);
       } finally {
         if (isMounted) setIsLoading(false);
       }
     }
 
-    fetchImage();
+    fetchImageAndDesc();
 
     return () => {
       isMounted = false;
     };
-  }, [vehicle.manufacturer, vehicle.commercialName, vehicle.model]);
+  }, [manufacturerEng, modelName, vehicle.year]);
 
   if (isLoading) {
     return (
@@ -145,19 +148,30 @@ export default function VehicleImage({ vehicle }: VehicleImageProps) {
     );
   }
 
-  if (!imageUrl) {
+  if (!imageUrl && !description && !carTitle) {
     return null;
   }
 
   return (
-    <div className="vehicle-image-container">
-      <img 
-        src={imageUrl} 
-        alt={`${vehicle.manufacturer || ''} ${vehicle.commercialName || ''}`} 
-        className="vehicle-image" 
-        loading="lazy"
-        onError={() => setImageUrl(null)}
-      />
-    </div>
+    <>
+      {imageUrl && (
+        <div className="vehicle-image-container">
+          <img 
+            src={imageUrl} 
+            alt={carTitle} 
+            className="vehicle-image" 
+            loading="lazy"
+            onError={() => setImageUrl(null)}
+          />
+        </div>
+      )}
+      
+      {(description || carTitle) && (
+        <div className="vehicle-description-card detail-section">
+          {carTitle && <h2 className="vehicle-title">{carTitle}</h2>}
+          {description && <p className="vehicle-description-text">{description}</p>}
+        </div>
+      )}
+    </>
   );
 }
