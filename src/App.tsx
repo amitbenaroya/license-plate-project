@@ -106,7 +106,7 @@ function LookupPageWithQuery() {
 function App() {
   return (
     <ThemeProvider>
-      <BrowserRouter>
+      <BrowserRouter basename="/license-plate-project/">
         <div className="app" id="app">
           <Navbar />
           <Routes>
