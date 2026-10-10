@@ -84,7 +84,7 @@ function LookupPageWithQuery() {
           Search by license plate number to view vehicle details from the official Israeli government registry.
         </p>
 
-        <PlateInput onSearch={handleSearch} isLoading={isLoading} />
+        <PlateInput onSearch={handleSearch} isLoading={isLoading} initialValue={lastSearchedPlate} />
       </div>
 
       <div className="lookup-results-area" id="lookup-results-area">

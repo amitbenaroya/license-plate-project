@@ -1,15 +1,22 @@
-import { useState, useRef, useCallback, type FormEvent, type ChangeEvent, type ClipboardEvent } from 'react';
+import { useState, useRef, useCallback, useEffect, type FormEvent, type ChangeEvent, type ClipboardEvent } from 'react';
 import { sanitizePlateInput, getValidationError } from '../validation';
 
 interface PlateInputProps {
   onSearch: (plate: string) => void;
   isLoading: boolean;
+  initialValue?: string;
 }
 
-export default function PlateInput({ onSearch, isLoading }: PlateInputProps) {
-  const [value, setValue] = useState('');
+export default function PlateInput({ onSearch, isLoading, initialValue = '' }: PlateInputProps) {
+  const [value, setValue] = useState(initialValue ? sanitizePlateInput(initialValue) : '');
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (initialValue) {
+      setValue(sanitizePlateInput(initialValue));
+    }
+  }, [initialValue]);
 
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const sanitized = sanitizePlateInput(e.target.value);
